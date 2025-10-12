@@ -9,38 +9,45 @@ import { BookOpen, RefreshCw, AlertCircle, Filter, X, Heart, Linkedin } from 'lu
 
 function App() {
   const [books, setBooks] = useState<PFEBook[]>([]);
-  const [filters, setFilters] = useState<Filters>({ 
-    departments: [], 
-    years: [], 
-    keywords: [] 
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [filters, setFilters] = useState<Filters>({
+    departments: [],
+    years: [],
+    keywords: []
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('');
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
-  // Mobile state
   const [isMobile, setIsMobile] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  // Modal state
   const [selectedBook, setSelectedBook] = useState<PFEBook | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Calculate pagination
-  const totalPages = Math.ceil(books.length / itemsPerPage);
+  const getFilteredBooks = () => {
+    let result = books;
+    if (showFavoritesOnly) {
+      result = result.filter(book => favorites.includes(book._id));
+    }
+    return result;
+  };
+
+  const filteredBooks = getFilteredBooks();
+
+  const totalPages = Math.ceil(filteredBooks.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentBooks = books.slice(startIndex, endIndex);
+  const currentBooks = filteredBooks.slice(startIndex, endIndex);
 
-  // Mobile detection
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -48,40 +55,36 @@ function App() {
         setShowFilters(false);
       }
     };
-    
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Pagination functions
   const goToPage = (page: number) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedDepartment, selectedYear, selectedKeywords, searchQuery]);
+  }, [selectedDepartment, selectedYear, selectedKeywords, searchQuery, showFavoritesOnly]);
 
   const fetchBooks = async () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const searchFilters: any = {};
       if (searchQuery) searchFilters.search = searchQuery;
       if (selectedDepartment) searchFilters.department = selectedDepartment;
       if (selectedYear) searchFilters.year = selectedYear.toString();
       if (selectedKeywords.length > 0) searchFilters.keywords = selectedKeywords.join(',');
-      
+
       const data = await driveService.fetchBooks(searchFilters);
       setBooks(data);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch books';
       setError(errorMessage);
-      console.error('Error fetching books:', error);
     } finally {
       setLoading(false);
     }
@@ -91,9 +94,17 @@ function App() {
     try {
       const data = await driveService.fetchFilters();
       setFilters(data);
-    } catch (error) {
-      console.error('Error fetching filters:', error);
-    }
+    } catch {}
+  };
+
+  const fetchFavorites = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/favorites');
+      if (response.ok) {
+        const data = await response.json();
+        setFavorites(data.map((fav: any) => fav.bookId));
+      }
+    } catch {}
   };
 
   const checkConnection = async () => {
@@ -122,11 +133,41 @@ function App() {
     setSelectedKeywords(newKeywords);
   };
 
+  const handleFavoritesToggle = (checked: boolean) => {
+    setShowFavoritesOnly(checked);
+  };
+
+  const handleToggleFavorite = async (bookId: string) => {
+    try {
+      const isFavorite = favorites.includes(bookId);
+
+      if (isFavorite) {
+        const response = await fetch(`http://localhost:5000/api/favorites/remove/${bookId}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (response.ok) {
+          setFavorites(prev => prev.filter(id => id !== bookId));
+        }
+      } else {
+        const response = await fetch('http://localhost:5000/api/favorites/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bookId }),
+        });
+        if (response.ok) {
+          setFavorites(prev => [...prev, bookId]);
+        }
+      }
+    } catch {}
+  };
+
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedDepartment('');
     setSelectedYear(null);
     setSelectedKeywords([]);
+    setShowFavoritesOnly(false);
   };
 
   const applyFilters = () => {
@@ -139,8 +180,7 @@ function App() {
   const handleBookDownload = async (book: PFEBook) => {
     try {
       await driveService.downloadBook(book._id, book.title, book.downloadUrl);
-    } catch (error) {
-      console.error('Download failed:', error);
+    } catch {
       alert('Download failed. Please try again.');
     }
   };
@@ -164,6 +204,7 @@ function App() {
     checkConnection();
     fetchBooks();
     fetchFilters();
+    fetchFavorites();
   }, []);
 
   useEffect(() => {
@@ -200,22 +241,17 @@ function App() {
                   <h3 className="text-sm font-medium text-red-800">Connection Error</h3>
                   <p className="mt-1 text-sm text-red-700">{error}</p>
                 </div>
-                <button
-                  onClick={clearError}
-                  className="text-red-600 hover:text-red-800"
-                >
-                  ×
-                </button>
+                <button onClick={clearError} className="text-red-600 hover:text-red-800">×</button>
               </div>
             </div>
           )}
 
           <div className="mb-4 lg:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">📚 PFE Archive</h1>
-              <p className="text-gray-600 mt-1 text-sm lg:text-base">Browse and download final year projects</p>
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">📚 PFEya</h1>
+              <p className="text-gray-600 mt-1 text-sm lg:text-base">Parcourir et télécharger les PFE</p>
             </div>
-            
+
             {isMobile && (
               <button
                 onClick={() => setShowFilters(!showFilters)}
@@ -228,34 +264,29 @@ function App() {
           </div>
 
           {isMobile ? (
-            <div>
-              {showFilters && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setShowFilters(false)} />
-              )}
-              
+            <>
+              {showFilters && <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setShowFilters(false)} />}
               {showFilters && (
                 <div className="fixed top-0 left-0 w-80 max-w-[85vw] h-full bg-white z-50 overflow-y-auto shadow-xl">
                   <div className="flex justify-between items-center p-4 border-b border-gray-200">
                     <h3 className="font-semibold text-gray-900">Filters</h3>
-                    <button 
-                      onClick={() => setShowFilters(false)}
-                      className="p-1 hover:bg-gray-100 rounded"
-                    >
+                    <button onClick={() => setShowFilters(false)} className="p-1 hover:bg-gray-100 rounded">
                       <X className="h-5 w-5 text-gray-500" />
                     </button>
                   </div>
-                  
                   <div className="p-4">
                     <FilterSidebar
-                      departments={filters.departments}
                       years={filters.years}
                       selectedDepartment={selectedDepartment}
                       selectedYear={selectedYear}
                       selectedKeywords={selectedKeywords}
                       availableKeywords={filters.keywords}
+                      showFavoritesOnly={showFavoritesOnly}
+                      favoritesCount={favorites.length}
                       onDepartmentChange={handleDepartmentChange}
                       onYearChange={handleYearChange}
                       onKeywordToggle={handleKeywordToggle}
+                      onFavoritesToggle={handleFavoritesToggle}
                       onClearFilters={clearFilters}
                       onApplyFilters={applyFilters}
                     />
@@ -263,61 +294,62 @@ function App() {
                 </div>
               )}
 
-              <div>
-                <div className="mb-4">
-                  <h2 className="text-xl font-bold text-gray-900 mb-2">PFE Collection</h2>
-                  <p className="text-gray-600 text-sm">
-                    {loading ? 'Loading...' : `${books.length} projects found • Page ${currentPage} of ${totalPages}`}
+              <div className="mb-4">
+                <h2 className="text-xl font-bold text-gray-900 mb-2">PFE Collection</h2>
+                <p className="text-gray-600 text-sm">
+                  {loading ? 'Loading...' : `${filteredBooks.length} projets trouvés • Page ${currentPage} de ${totalPages}`}
+                </p>
+              </div>
+
+              {filteredBooks.length === 0 && !loading ? (
+                <div className="text-center py-12">
+                  <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No projects found</h3>
+                  <p className="text-gray-600 mb-4 px-4 text-sm">
+                    {showFavoritesOnly
+                      ? 'You have no favorite books yet. Start adding some!'
+                      : error
+                      ? 'Unable to connect to the server. Please check if the backend is running.'
+                      : 'Try adjusting your search criteria or contact the administrator to sync new projects.'}
                   </p>
                 </div>
-
-                {books.length === 0 && !loading ? (
-                  <div className="text-center py-12">
-                    <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No projects found</h3>
-                    <p className="text-gray-600 mb-4 px-4 text-sm">
-                      {error 
-                        ? 'Unable to connect to the server. Please check if the backend is running.' 
-                        : 'Try adjusting your search criteria or contact the administrator to sync new projects.'
-                      }
-                    </p>
-                  </div>
-                ) : (
-                  <div>
-                    <div className="grid grid-cols-1 gap-4">
-                      {currentBooks.map(book => (
-                        <BookCard
-                          key={book._id}
-                          book={book}
-                          onDownload={handleBookDownload}
-                          onViewDetails={handleViewDetails}
-                        />
-                      ))}
-                    </div>
-
-                    <Pagination
-                      currentPage={currentPage}
-                      totalPages={totalPages}
-                      onPageChange={goToPage}
-                      isMobile={true}
+              ) : (
+                <div className="grid grid-cols-1 gap-4">
+                  {currentBooks.map(book => (
+                    <BookCard
+                      key={book._id}
+                      book={book}
+                      isFavorite={favorites.includes(book._id)}
+                      onDownload={handleBookDownload}
+                      onViewDetails={handleViewDetails}
+                      onToggleFavorite={handleToggleFavorite}
                     />
-                  </div>
-                )}
-              </div>
-            </div>
+                  ))}
+                </div>
+              )}
+
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={goToPage}
+                isMobile={true}
+              />
+            </>
           ) : (
             <div className="flex gap-8">
               <div className="w-64 flex-shrink-0">
                 <FilterSidebar
-                  departments={filters.departments}
                   years={filters.years}
                   selectedDepartment={selectedDepartment}
                   selectedYear={selectedYear}
                   selectedKeywords={selectedKeywords}
                   availableKeywords={filters.keywords}
+                  showFavoritesOnly={showFavoritesOnly}
+                  favoritesCount={favorites.length}
                   onDepartmentChange={handleDepartmentChange}
                   onYearChange={handleYearChange}
                   onKeywordToggle={handleKeywordToggle}
+                  onFavoritesToggle={handleFavoritesToggle}
                   onClearFilters={clearFilters}
                 />
               </div>
@@ -326,42 +358,43 @@ function App() {
                 <div className="mb-6">
                   <h2 className="text-2xl font-bold text-gray-900 mb-2">PFE Collection</h2>
                   <p className="text-gray-600">
-                    {loading ? 'Loading...' : `${books.length} projects found • Page ${currentPage} of ${totalPages}`}
+                    {loading ? 'Loading...' : `${filteredBooks.length} projets trouvés • Page ${currentPage} de ${totalPages}`}
                   </p>
                 </div>
 
-                {books.length === 0 && !loading ? (
+                {filteredBooks.length === 0 && !loading ? (
                   <div className="text-center py-12">
                     <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">No projects found</h3>
                     <p className="text-gray-600 mb-4">
-                      {error 
-                        ? 'Unable to connect to the server. Please check if the backend is running.' 
-                        : 'Try adjusting your search criteria or contact the administrator to sync new projects.'
-                      }
+                      {showFavoritesOnly
+                        ? 'You have no favorite books yet. Start adding some!'
+                        : error
+                        ? 'Unable to connect to the server. Please check if the backend is running.'
+                        : 'Try adjusting your search criteria or contact the administrator to sync new projects.'}
                     </p>
                   </div>
                 ) : (
-                  <div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
-                      {currentBooks.map(book => (
-                        <BookCard
-                          key={book._id}
-                          book={book}
-                          onDownload={handleBookDownload}
-                          onViewDetails={handleViewDetails}
-                        />
-                      ))}
-                    </div>
-
-                    <Pagination
-                      currentPage={currentPage}
-                      totalPages={totalPages}
-                      onPageChange={goToPage}
-                      isMobile={false}
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-stretch">
+                    {currentBooks.map(book => (
+                      <BookCard
+                        key={book._id}
+                        book={book}
+                        isFavorite={favorites.includes(book._id)}
+                        onDownload={handleBookDownload}
+                        onViewDetails={handleViewDetails}
+                        onToggleFavorite={handleToggleFavorite}
+                      />
+                    ))}
                   </div>
                 )}
+
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={goToPage}
+                  isMobile={false}
+                />
               </div>
             </div>
           )}
@@ -396,7 +429,7 @@ function App() {
                 </div>
               </a>
             </div>
-            
+
             <div className="text-sm text-gray-500 text-center">
               <span>Good luck with your PFE</span>
             </div>

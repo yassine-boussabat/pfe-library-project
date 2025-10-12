@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { X, Download, Calendar, User, Building2, Tag, FileText, Clock, ExternalLink } from 'lucide-react';
+import { X, Download, Calendar, User, Building2, Tag, FileText, Clock} from 'lucide-react';
 import { PFEBook } from '../services/driveService';
 
 interface BookModalProps {
@@ -10,6 +10,28 @@ interface BookModalProps {
 }
 
 const BookModal: React.FC<BookModalProps> = ({ book, isOpen, onClose, onDownload }) => {
+  React.useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      const originalOverflow = document.body.style.overflow;
+      
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+
+      return () => {
+        document.removeEventListener('keydown', handleEscape);
+        document.body.style.overflow = originalOverflow || 'auto';
+      };
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+  }, [isOpen, onClose]);
+
   if (!isOpen || !book) return null;
 
   const formatFileSize = (bytes: number) => {
@@ -28,45 +50,17 @@ const BookModal: React.FC<BookModalProps> = ({ book, isOpen, onClose, onDownload
     });
   };
 
-  // Close modal when clicking outside
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
 
-  // Close modal on Escape key and handle body scroll
-  React.useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      // Store original overflow value
-      const originalOverflow = document.body.style.overflow;
-      
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
-
-      return () => {
-        document.removeEventListener('keydown', handleEscape);
-        // Restore original overflow or set to default
-        document.body.style.overflow = originalOverflow || 'auto';
-      };
-    } else {
-      // Ensure scrolling is enabled when modal is closed
-      document.body.style.overflow = 'auto';
-    }
-  }, [isOpen, onClose]);
-
   return (
     <div 
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
       onClick={handleOverlayClick}
     >
-      {/* Removed overflow-y-auto and adjusted max-height */}
       <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full h-fit max-h-[90vh] flex flex-col">
         <div className="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-start rounded-t-xl flex-shrink-0">
           <div>
@@ -83,8 +77,8 @@ const BookModal: React.FC<BookModalProps> = ({ book, isOpen, onClose, onDownload
           </button>
         </div>
 
-        {/* Make content area scrollable with custom scrollbar styles */}
-        <div className="p-6 flex-1 min-h-0 overflow-y-auto scrollbar-hide">
+        {/* Scrollable content with hidden scrollbar using Tailwind */}
+        <div className="p-6 flex-1 min-h-0 overflow-y-auto scrollbar-none">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1">
               <div className="relative h-80 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg mb-6 overflow-hidden border border-gray-200">
@@ -236,16 +230,6 @@ const BookModal: React.FC<BookModalProps> = ({ book, isOpen, onClose, onDownload
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
     </div>
   );
 };

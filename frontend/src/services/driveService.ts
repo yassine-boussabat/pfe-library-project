@@ -31,59 +31,43 @@ class DriveService {
   }
 
   async fetchBooks(filters: any = {}): Promise<PFEBook[]> {
-    try {
-      const params = new URLSearchParams(filters);
-      const response = await fetch(`${this.baseUrl}/books?${params}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      return await response.json();
-    } catch (error) {
-      throw error;
+    const params = new URLSearchParams(filters);
+    const response = await fetch(`${this.baseUrl}/books?${params}`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
+    
+    return await response.json();
   }
 
   async fetchFilters(): Promise<Filters> {
-    try {
-      const response = await fetch(`${this.baseUrl}/filters`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      return await response.json();
-    } catch (error) {
-      throw error;
+    const response = await fetch(`${this.baseUrl}/filters`);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
+    
+    return await response.json();
   }
 
   async importFromDrive(): Promise<{processed: number, errors: number}> {
-    try {
-      const response = await fetch(`${this.baseUrl}/sync`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+    const response = await fetch(`${this.baseUrl}/sync`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw error;
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
+
+    return await response.json();
   }
 
   async downloadBook(bookId: string, title: string, downloadUrl: string): Promise<void> {
-    try {
-      window.open(downloadUrl, '_blank');
-    } catch (error) {
-      throw error;
-    }
+    window.open(downloadUrl, '_blank');
   }
 }
 

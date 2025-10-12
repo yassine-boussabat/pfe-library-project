@@ -20,7 +20,7 @@ const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <h1 className="text-xl font-bold text-gray-900">📚 PFE Archive</h1>
+              <h1 className="text-xl font-bold text-gray-900">📚 PFEya</h1>
             </div>
           </div>
           
@@ -34,7 +34,7 @@ const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
-                  placeholder="Search by title or author"
+                  placeholder="Rechercher par titre ou auteur"
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
               </div>

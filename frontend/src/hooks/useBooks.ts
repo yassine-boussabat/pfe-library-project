@@ -51,7 +51,6 @@ export const useBooks = (options: UseBooksOptions = { autoFetch: true }) => {
       setError(null);
       const result = await driveService.importFromDrive();
       
-      // Refresh books and filters after sync
       await Promise.all([
         fetchBooks(),
         fetchFilters()
@@ -85,7 +84,6 @@ export const useBooks = (options: UseBooksOptions = { autoFetch: true }) => {
     setError(null);
   };
 
-  // Check API connection on mount
   const checkConnection = async () => {
     const isConnected = await driveService.checkConnection();
     if (!isConnected) {

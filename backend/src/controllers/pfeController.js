@@ -1,28 +1,22 @@
 const PFEBook = require('../models/PFEBook');
 const googleDriveService = require('../services/googleDriveService');
-const localAiService = require('../services/localAiService'); // Fixed import
+const localAiService = require('../services/localAiService');
 const thumbnailService = require('../services/thumbnailService');
 
-// Simple functions instead of class - cleaner and more Node.js idiomatic
 const syncFromGoogleDrive = async (req, res) => {
-  // Check if Google Drive is available
   if (!googleDriveService.isEnabled) {
-    return res.status(400).json({
-      error: 'Google Drive service not available. Check your credentials.'
-    });
+    return res.status(400).json({ error: 'Google Drive service not available. Check your credentials.' });
   }
 
   const files = await googleDriveService.listPDFFiles();
   let processed = 0;
   let errors = 0;
   let skipped = 0;
-
-  // Enhanced batch processing for better performance
   const BATCH_SIZE = 3;
-  
+
   for (let i = 0; i < files.length; i += BATCH_SIZE) {
     const batch = files.slice(i, i + BATCH_SIZE);
-    
+
     const batchPromises = batch.map(async (file) => {
       try {
         const existing = await PFEBook.findOne({ googleDriveId: file.id });
@@ -39,23 +33,21 @@ const syncFromGoogleDrive = async (req, res) => {
         });
         const pdfBuffer = Buffer.concat(chunks);
 
-        // Enhanced AI processing with timeout
         let text = '';
         try {
           const textPromise = localAiService.extractTextFromPDF(pdfBuffer);
           text = await Promise.race([
             textPromise,
-            new Promise((_, reject) => 
+            new Promise((_, reject) =>
               setTimeout(() => reject(new Error('Text extraction timeout')), 20000)
             )
           ]);
-        } catch (error) {
-          console.warn(`Text extraction failed for ${file.name}:`, error.message);
+        } catch {
           text = 'Text extraction failed';
         }
 
         const aiResult = await localAiService.generateSummaryAndKeywords(text, file.name);
-        
+
         const bookData = {
           googleDriveId: file.id,
           title: file.name.replace('.pdf', ''),
@@ -73,44 +65,36 @@ const syncFromGoogleDrive = async (req, res) => {
         const pfeBook = new PFEBook(bookData);
         const savedBook = await pfeBook.save();
 
-        // Background thumbnail processing
         setImmediate(async () => {
           try {
             if (file.thumbnailLink) {
               const localThumbnailPath = await thumbnailService.downloadAndSaveGoogleThumbnail(
-                file.thumbnailLink, 
+                file.thumbnailLink,
                 file.id
               );
-              
               if (localThumbnailPath) {
-                await PFEBook.findByIdAndUpdate(savedBook._id, { 
-                  thumbnailPath: localThumbnailPath 
-                });
+                await PFEBook.findByIdAndUpdate(savedBook._id, { thumbnailPath: localThumbnailPath });
               }
             }
-          } catch (thumbnailError) {
-            console.warn(`Thumbnail processing failed for ${file.name}:`, thumbnailError.message);
-          }
+          } catch {}
         });
 
         return { type: 'processed', file: file.name };
-      } catch (error) {
-        console.error(`Processing failed for ${file.name}:`, error.message);
-        return { type: 'error', file: file.name, error: error.message };
+      } catch {
+        return { type: 'error', file: file.name };
       }
     });
 
     const batchResults = await Promise.all(batchPromises);
-    
+
     batchResults.forEach(result => {
-      switch(result.type) {
+      switch (result.type) {
         case 'processed': processed++; break;
         case 'skipped': skipped++; break;
         case 'error': errors++; break;
       }
     });
 
-    // Rate limiting between batches
     if (i + BATCH_SIZE < files.length) {
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
@@ -138,31 +122,25 @@ const fixThumbnails = async (req, res) => {
 
   let fixed = 0;
   const allFiles = await googleDriveService.listPDFFiles();
-  
+
   for (const book of booksToFix) {
     try {
       const driveFile = allFiles.find(f => f.id === book.googleDriveId);
-      
       if (driveFile && driveFile.thumbnailLink) {
         const localThumbnailPath = await thumbnailService.downloadAndSaveGoogleThumbnail(
           driveFile.thumbnailLink,
           book.googleDriveId
         );
-        
         if (localThumbnailPath) {
-          await PFEBook.findByIdAndUpdate(book._id, { 
-            thumbnailPath: localThumbnailPath 
-          });
+          await PFEBook.findByIdAndUpdate(book._id, { thumbnailPath: localThumbnailPath });
           fixed++;
         }
       }
-    } catch (error) {
-      console.warn(`Thumbnail fix failed for book ${book._id}:`, error.message);
-    }
+    } catch {}
   }
 
-  res.json({ 
-    success: true, 
+  res.json({
+    success: true,
     message: `Downloaded and saved ${fixed} thumbnails locally`,
     fixed,
     total: booksToFix.length
@@ -201,7 +179,7 @@ const getAllBooks = async (req, res) => {
 const getFilters = async (req, res) => {
   const allDepartments = [
     'Informatique',
-    'Génie Électrique', 
+    'Génie Électrique',
     'Génie Mécanique',
     'Génie Civil',
     'Sciences des Données',
@@ -209,7 +187,6 @@ const getFilters = async (req, res) => {
     'Télécommunications'
   ];
 
-  // Use Promise.all for better performance
   const [years, keywords] = await Promise.all([
     PFEBook.distinct('year'),
     PFEBook.distinct('keywords')

@@ -1,14 +1,22 @@
 import * as React from 'react';
 import { PFEBook } from '../services/driveService';
-import { Calendar, User, Download, Tag, FileText, Eye } from 'lucide-react';
+import { Calendar, User, Download, Tag, FileText, Eye, Heart } from 'lucide-react';
 
 interface BookCardProps {
   book: PFEBook;
+  isFavorite: boolean;
   onDownload: (book: PFEBook) => void;
   onViewDetails: (book: PFEBook) => void;
+  onToggleFavorite: (bookId: string) => void;
 }
 
-const BookCard: React.FC<BookCardProps> = ({ book, onDownload, onViewDetails }) => { // ✅ Fixed: Added onViewDetails
+const BookCard: React.FC<BookCardProps> = ({ 
+  book, 
+  isFavorite,
+  onDownload, 
+  onViewDetails,
+  onToggleFavorite 
+}) => {
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -62,6 +70,23 @@ const BookCard: React.FC<BookCardProps> = ({ book, onDownload, onViewDetails }) 
               <p className="text-xs text-gray-400 mt-1">No preview available</p>
             </div>
           </div>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFavorite(book._id);
+            }}
+            className="absolute top-2 left-2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 hover:scale-110 z-10"
+            title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+          >
+            <Heart 
+              className={`h-5 w-5 transition-colors ${
+                isFavorite 
+                  ? 'fill-red-500 text-red-500' 
+                  : 'text-gray-400 hover:text-red-500'
+              }`}
+            />
+          </button>
         </div>
 
         <div className="h-16 mb-3 flex items-start">
