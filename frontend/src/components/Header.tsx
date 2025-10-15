@@ -23,10 +23,10 @@ const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
               <div className="flex items-center gap-2">
                 <img 
                   src="/logo.jpg" 
-                  alt="PFEya Logo" 
+                  alt="PFEz Logo" 
                   className="h-10 w-10 object-contain"
                 />
-                <h1 className="text-xl font-bold text-gray-900">PFEya</h1>
+                <h1 className="text-xl font-bold text-gray-900">PFEz</h1>
               </div>
             </div>
           </div>
