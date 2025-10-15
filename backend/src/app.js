@@ -5,8 +5,24 @@ const routes = require('./routes');
 
 const app = express();
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://pfe-library-project.vercel.app',
+  'https://pfe-library-project-mjrk61laz-yassine-boussabats-projects.vercel.app',
+  /^https:\/\/pfe-library-project.*\.vercel\.app$/
+];
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.some(allowed => 
+      typeof allowed === 'string' ? allowed === origin : allowed.test(origin)
+    )) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 
