@@ -7,6 +7,8 @@ import Pagination from './components/Pagination';
 import driveService, { PFEBook, Filters } from './services/driveService';
 import { BookOpen, RefreshCw, AlertCircle, Filter, X, Heart, Linkedin } from 'lucide-react';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
 function App() {
   const [books, setBooks] = useState<PFEBook[]>([]);
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -99,7 +101,7 @@ function App() {
 
   const fetchFavorites = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/favorites');
+      const response = await fetch(`${API_URL}/api/favorites`);
       if (response.ok) {
         const data = await response.json();
         setFavorites(data.map((fav: any) => fav.bookId));
@@ -142,7 +144,7 @@ function App() {
       const isFavorite = favorites.includes(bookId);
 
       if (isFavorite) {
-        const response = await fetch(`http://localhost:5000/api/favorites/remove/${bookId}`, {
+        const response = await fetch(`${API_URL}/api/favorites/remove/${bookId}`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
         });
@@ -150,7 +152,7 @@ function App() {
           setFavorites(prev => prev.filter(id => id !== bookId));
         }
       } else {
-        const response = await fetch('http://localhost:5000/api/favorites/add', {
+        const response = await fetch(`${API_URL}/api/favorites/add`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ bookId }),

@@ -18,12 +18,15 @@ export interface Filters {
   keywords: string[];
 }
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+
 class DriveService {
-  private baseUrl = 'http://localhost:5000/api/pfe';
+  private baseUrl = `${API_URL}/api/pfe`;
 
   async checkConnection(): Promise<boolean> {
     try {
-      const response = await fetch('http://localhost:5000');
+      const response = await fetch(API_URL);
       return response.ok;
     } catch (error) {
       return false;
