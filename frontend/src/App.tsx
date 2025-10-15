@@ -101,12 +101,13 @@ function App() {
 
   const fetchFavorites = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/favorites`);
-      if (response.ok) {
-        const data = await response.json();
-        setFavorites(data.map((fav: any) => fav.bookId));
+      const storedFavorites = localStorage.getItem('pfe-favorites');
+      if (storedFavorites) {
+        setFavorites(JSON.parse(storedFavorites));
       }
-    } catch {}
+    } catch (error) {
+      console.error('Error loading favorites:', error);
+    }
   };
 
   const checkConnection = async () => {
@@ -142,26 +143,19 @@ function App() {
   const handleToggleFavorite = async (bookId: string) => {
     try {
       const isFavorite = favorites.includes(bookId);
+      let newFavorites: string[];
 
       if (isFavorite) {
-        const response = await fetch(`${API_URL}/api/favorites/remove/${bookId}`, {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        if (response.ok) {
-          setFavorites(prev => prev.filter(id => id !== bookId));
-        }
+        newFavorites = favorites.filter(id => id !== bookId);
       } else {
-        const response = await fetch(`${API_URL}/api/favorites/add`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ bookId }),
-        });
-        if (response.ok) {
-          setFavorites(prev => [...prev, bookId]);
-        }
+        newFavorites = [...favorites, bookId];
       }
-    } catch {}
+      
+      setFavorites(newFavorites);
+      localStorage.setItem('pfe-favorites', JSON.stringify(newFavorites));
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+    }
   };
 
   const clearFilters = () => {
