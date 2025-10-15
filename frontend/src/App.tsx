@@ -250,7 +250,7 @@ function App() {
                   alt="PFEz Logo" 
                   className="h-8 w-8 lg:h-10 lg:w-10 object-contain"
                 />
-                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">PFEz</h1>
+                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">PFErks</h1>
               </div>
               <p className="text-gray-600 mt-1 text-sm lg:text-base">Parcourir et télécharger les PFE</p>
             </div>

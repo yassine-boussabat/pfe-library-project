@@ -26,7 +26,7 @@ const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
                   alt="PFEz Logo" 
                   className="h-10 w-10 object-contain"
                 />
-                <h1 className="text-xl font-bold text-gray-900">PFEz</h1>
+                <h1 className="text-xl font-bold text-gray-900">PFErks</h1>
               </div>
             </div>
           </div>
