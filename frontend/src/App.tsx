@@ -209,11 +209,18 @@ function App() {
 
   if (loading && books.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="h-12 w-12 text-blue-600 mx-auto mb-4 animate-spin" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Loading PFE Library</h3>
-          <p className="text-gray-600">Fetching books from the database...</p>
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <Header
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          onSearch={applyFilters}
+        />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <RefreshCw className="h-12 w-12 text-blue-600 mx-auto mb-4 animate-spin" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Loading PFE Library</h3>
+            <p className="text-gray-600">Fetching books from the database...</p>
+          </div>
         </div>
       </div>
     );
