@@ -148,7 +148,12 @@ const fixThumbnails = async (req, res) => {
 };
 
 const getAllBooks = async (req, res) => {
-  const { search, department, year, keywords } = req.query;
+  const { search, department, year, keywords, page = 1, limit = 50 } = req.query;
+  
+  const pageNum = parseInt(page);
+  const limitNum = parseInt(limit);
+  const skip = (pageNum - 1) * limitNum;
+  
   let query = {};
 
   if (search) {
@@ -172,8 +177,23 @@ const getAllBooks = async (req, res) => {
     query.keywords = { $in: keywordArray };
   }
 
-  const books = await PFEBook.find(query).sort({ createdAt: -1 });
-  res.json(books);
+  const total = await PFEBook.countDocuments(query);
+  
+  const books = await PFEBook.find(query)
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limitNum);
+
+  res.json({
+    books,
+    pagination: {
+      total,
+      page: pageNum,
+      limit: limitNum,
+      totalPages: Math.ceil(total / limitNum),
+      hasMore: skip + books.length < total
+    }
+  });
 };
 
 const getFilters = async (req, res) => {

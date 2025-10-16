@@ -81,9 +81,11 @@ function App() {
       if (selectedDepartment) searchFilters.department = selectedDepartment;
       if (selectedYear) searchFilters.year = selectedYear.toString();
       if (selectedKeywords.length > 0) searchFilters.keywords = selectedKeywords.join(',');
+      
+      searchFilters.limit = 1000;
 
       const data = await driveService.fetchBooks(searchFilters);
-      setBooks(data);
+      setBooks(data.books);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to fetch books';
       setError(errorMessage);
