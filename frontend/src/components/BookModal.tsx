@@ -129,7 +129,7 @@ const BookModal: React.FC<BookModalProps> = ({ book, isOpen, onClose, onDownload
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 font-medium shadow-sm hover:shadow-md mb-3 flex-shrink-0"
               >
                 <Download className="h-4 w-4" />
-                Télécharger le PDF
+                Télécharger
               </button>
 
               {/* File Info */}
