@@ -15,7 +15,7 @@ const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b">
+    <header className="sticky top-0 left-0 w-full z-50 bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
@@ -23,7 +23,7 @@ const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
               <div className="flex items-center gap-2">
                 <img 
                   src="/logo.jpg" 
-                  alt="PFEz Logo" 
+                  alt="PFErks Logo" 
                   className="h-10 w-10 object-contain"
                 />
                 <h1 className="text-xl font-bold text-gray-900">PFErks</h1>
@@ -44,8 +44,6 @@ const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
                   placeholder="Rechercher par titre ou auteur"
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
-              </div>
-              <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
               </div>
             </form>
           </div>

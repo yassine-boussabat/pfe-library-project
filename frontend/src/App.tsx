@@ -87,7 +87,7 @@ function App() {
       const data = await driveService.fetchBooks(searchFilters);
       setBooks(data.books);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch books';
+      const errorMessage = error instanceof Error ? error.message : 'Échec de la récupération des livres';
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -108,14 +108,14 @@ function App() {
         setFavorites(JSON.parse(storedFavorites));
       }
     } catch (error) {
-      console.error('Error loading favorites:', error);
+      console.error('Erreur lors du chargement des favoris:', error);
     }
   };
 
   const checkConnection = async () => {
     const isConnected = await driveService.checkConnection();
     if (!isConnected) {
-      setError('Unable to connect to backend API. Please make sure the server is running on localhost:5000');
+      setError('Impossible de se connecter à l\'API backend. Veuillez vous assurer que le serveur fonctionne sur localhost:5000');
     }
   };
 
@@ -156,7 +156,7 @@ function App() {
       setFavorites(newFavorites);
       localStorage.setItem('pfe-favorites', JSON.stringify(newFavorites));
     } catch (error) {
-      console.error('Error toggling favorite:', error);
+      console.error('Erreur lors de la modification des favoris:', error);
     }
   };
 
@@ -179,7 +179,7 @@ function App() {
     try {
       await driveService.downloadBook(book._id, book.title, book.downloadUrl);
     } catch {
-      alert('Download failed. Please try again.');
+      alert('Échec du téléchargement. Veuillez réessayer.');
     }
   };
 
@@ -220,8 +220,8 @@ function App() {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <RefreshCw className="h-12 w-12 text-blue-600 mx-auto mb-4 animate-spin" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Loading PFE Library</h3>
-            <p className="text-gray-600">Fetching books from the database...</p>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Chargement de la bibliothèque PFE</h3>
+            <p className="text-gray-600">Récupération des livres depuis la base de données...</p>
           </div>
         </div>
       </div>
@@ -243,7 +243,7 @@ function App() {
               <div className="flex items-start">
                 <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 mr-3" />
                 <div className="flex-1">
-                  <h3 className="text-sm font-medium text-red-800">Connection Error</h3>
+                  <h3 className="text-sm font-medium text-red-800">Erreur de connexion</h3>
                   <p className="mt-1 text-sm text-red-700">{error}</p>
                 </div>
                 <button onClick={clearError} className="text-red-600 hover:text-red-800">×</button>
@@ -252,25 +252,13 @@ function App() {
           )}
 
           <div className="mb-4 lg:mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <img 
-                  src="/logo.jpg" 
-                  alt="PFEz Logo" 
-                  className="h-8 w-8 lg:h-10 lg:w-10 object-contain"
-                />
-                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">PFErks</h1>
-              </div>
-              <p className="text-gray-600 mt-1 text-sm lg:text-base">Parcourir et télécharger les PFE</p>
-            </div>
-
             {isMobile && (
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className="flex items-center justify-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors w-full sm:w-auto"
               >
                 <Filter className="h-4 w-4" />
-                {showFilters ? 'Hide Filters' : 'Show Filters'}
+                {showFilters ? 'Masquer les filtres' : 'Afficher les filtres'}
               </button>
             )}
           </div>
@@ -281,7 +269,7 @@ function App() {
               {showFilters && (
                 <div className="fixed top-0 left-0 w-80 max-w-[85vw] h-full bg-white z-50 overflow-y-auto shadow-xl">
                   <div className="flex justify-between items-center p-4 border-b border-gray-200">
-                    <h3 className="font-semibold text-gray-900">Filters</h3>
+                    <h3 className="font-semibold text-gray-900">Filtres</h3>
                     <button onClick={() => setShowFilters(false)} className="p-1 hover:bg-gray-100 rounded">
                       <X className="h-5 w-5 text-gray-500" />
                     </button>
@@ -307,22 +295,22 @@ function App() {
               )}
 
               <div className="mb-4">
-                <h2 className="text-xl font-bold text-gray-900 mb-2">PFE Collection</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">Collection PFE</h2>
                 <p className="text-gray-600 text-sm">
-                  {loading ? 'Loading...' : `${filteredBooks.length} projets trouvés • Page ${currentPage} de ${totalPages}`}
+                  {loading ? 'Chargement...' : `${filteredBooks.length} projets trouvés • Page ${currentPage} de ${totalPages}`}
                 </p>
               </div>
 
               {filteredBooks.length === 0 && !loading ? (
                 <div className="text-center py-12">
                   <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No projects found</h3>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun projet trouvé</h3>
                   <p className="text-gray-600 mb-4 px-4 text-sm">
                     {showFavoritesOnly
-                      ? 'You have no favorite books yet. Start adding some!'
+                      ? 'Vous n\'avez pas encore de livres favoris. Commencez à en ajouter !'
                       : error
-                      ? 'Unable to connect to the server. Please check if the backend is running.'
-                      : 'Try adjusting your search criteria or contact the administrator to sync new projects.'}
+                      ? 'Impossible de se connecter au serveur. Veuillez vérifier si le backend est en cours d\'exécution.'
+                      : 'Essayez d\'ajuster vos critères de recherche ou contactez l\'administrateur pour synchroniser de nouveaux projets.'}
                   </p>
                 </div>
               ) : (
@@ -368,22 +356,22 @@ function App() {
 
               <div className="flex-1 min-w-0">
                 <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">PFE Collection</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Collection PFE</h2>
                   <p className="text-gray-600">
-                    {loading ? 'Loading...' : `${filteredBooks.length} projets trouvés • Page ${currentPage} de ${totalPages}`}
+                    {loading ? 'Chargement...' : `${filteredBooks.length} projets trouvés • Page ${currentPage} de ${totalPages}`}
                   </p>
                 </div>
 
                 {filteredBooks.length === 0 && !loading ? (
                   <div className="text-center py-12">
                     <BookOpen className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No projects found</h3>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun projet trouvé</h3>
                     <p className="text-gray-600 mb-4">
                       {showFavoritesOnly
-                        ? 'You have no favorite books yet. Start adding some!'
+                        ? 'Vous n\'avez pas encore de livres favoris. Commencez à en ajouter !'
                         : error
-                        ? 'Unable to connect to the server. Please check if the backend is running.'
-                        : 'Try adjusting your search criteria or contact the administrator to sync new projects.'}
+                        ? 'Impossible de se connecter au serveur. Veuillez vérifier si le backend est en cours d\'exécution.'
+                        : 'Essayez d\'ajuster vos critères de recherche ou contactez l\'administrateur pour synchroniser de nouveaux projets.'}
                     </p>
                   </div>
                 ) : (
@@ -415,7 +403,7 @@ function App() {
             <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
               <div className="bg-white rounded-lg p-4 flex items-center gap-3 mx-4">
                 <RefreshCw className="h-5 w-5 animate-spin text-blue-600" />
-                <span>Updating results...</span>
+                <span>Mise à jour des résultats...</span>
               </div>
             </div>
           )}
@@ -426,9 +414,9 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center gap-4">
             <div className="flex items-center gap-2 text-gray-600">
-              <span>Made with</span>
+              <span>Fait avec</span>
               <Heart className="w-4 h-4 text-red-500 fill-current animate-pulse" />
-              <span>by</span>
+              <span>par</span>
               <a
                 href="https://www.linkedin.com/in/yassine-boussabat-291157298/"
                 target="_blank"
@@ -443,7 +431,7 @@ function App() {
             </div>
 
             <div className="text-sm text-gray-500 text-center">
-              <span>Good luck with your PFE</span>
+              <span>Bonne chance avec votre PFE</span>
             </div>
           </div>
         </div>

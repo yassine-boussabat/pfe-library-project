@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Filter, X, Heart } from 'lucide-react';
+import { Filter, Heart } from 'lucide-react';
 
 interface FilterSidebarProps {
   years: number[];
@@ -131,7 +131,7 @@ const FilterSidebar = ({
 
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Keywords
+          Mots-clés
         </label>
         <div className="max-h-48 overflow-y-auto space-y-1 border rounded-md p-2 bg-gray-50">
           {availableKeywords.length > 0 ? (
@@ -150,7 +150,7 @@ const FilterSidebar = ({
               </label>
             ))
           ) : (
-            <div className="text-sm text-gray-500 p-2">No keywords available - add some documents first</div>
+            <div className="text-sm text-gray-500 p-2">Aucun mot-clé disponible - ajoutez d'abord des documents</div>
           )}
         </div>
       </div>
@@ -167,12 +167,12 @@ const FilterSidebar = ({
             className={`h-4 w-4 transition-colors ${showFavoritesOnly ? 'fill-red-500 text-red-500' : 'text-gray-400 group-hover:text-red-500'}`} 
           />
           <span className="text-sm font-medium text-gray-700 flex-1 group-hover:text-red-600 transition-colors">
-            Les favoris
+            Mes favoris
           </span>
         </label>
         {showFavoritesOnly && (
           <div className="mt-2 ml-8 text-xs text-gray-500">
-            {favoritesCount} favorite book{favoritesCount !== 1 ? 's' : ''}
+            {favoritesCount} livre{favoritesCount !== 1 ? 's' : ''} favori{favoritesCount !== 1 ? 's' : ''}
           </div>
         )}
       </div>
@@ -183,7 +183,7 @@ const FilterSidebar = ({
             onClick={handleApplyFilters}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium"
           >
-            Apply Filters
+            Appliquer les filtres
           </button>
         </div>
       )}
@@ -191,11 +191,11 @@ const FilterSidebar = ({
       {(selectedDepartment || selectedYear || selectedKeywords.length > 0 || showFavoritesOnly) && (
         <div className="mt-4 pt-4 border-t">
           <div className="text-xs text-gray-500">
-            Active filters: {[
-              selectedDepartment && 'Department',
-              selectedYear && 'Year', 
-              selectedKeywords.length > 0 && `${selectedKeywords.length} Keywords`,
-              showFavoritesOnly && 'Favorites'
+            Filtres actifs : {[
+              selectedDepartment && 'Département',
+              selectedYear && 'Année', 
+              selectedKeywords.length > 0 && `${selectedKeywords.length} Mots-clés`,
+              showFavoritesOnly && 'Favoris'
             ].filter(Boolean).join(', ')}
           </div>
         </div>

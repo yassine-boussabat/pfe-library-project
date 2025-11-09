@@ -13,23 +13,22 @@ class LocalAiService {
       const hasModel = models.some(m => m.name.includes('qwen2.5:7b'));
       
       if (hasModel) {
-        console.log('✅ Ollama connected with Qwen2.5:7B model');
+        console.log('Ollama connected with Qwen2.5:7B model');
         return true;
       } else {
-        console.log('⚠️ Ollama connected but Qwen2.5:7B model not found');
+        console.log(' Ollama connected but Qwen2.5:7B model not found');
         console.log('Available models:', models.map(m => m.name));
-        console.log('💡 Please run: ollama pull qwen2.5:7b');
+        console.log(' Please run: ollama pull qwen2.5:7b');
         return false;
       }
     } catch (error) {
-      console.error('❌ Ollama connection failed:', error.message);
+      console.error(' Ollama connection failed:', error.message);
       return false;
     }
   }
 
   async generateSummaryAndKeywords(text, filename = '') {
     try {
-      console.log('🤖 Using Qwen2.5:7B for PFE document analysis...');
       
       const filenameInfo = this.extractInfoFromFilename(filename);
       
@@ -64,7 +63,7 @@ DOMAINE: [Informatique, Génie Électrique, Génie Mécanique, etc.]`;
       });
 
       let aiResponse = response.data.response.trim();
-      console.log('🤖 Qwen2.5:7B response:', aiResponse.substring(0, 200) + '...');
+      console.log(' Qwen2.5:7B response:', aiResponse.substring(0, 200) + '...');
       
       let parsed = this.parseQwenResponse(aiResponse);
       
@@ -79,7 +78,7 @@ DOMAINE: [Informatique, Génie Électrique, Génie Mécanique, etc.]`;
       };
 
     } catch (error) {
-      console.error('❌ Qwen2.5:7B processing failed:', error.message);
+      console.error('Qwen2.5:7B processing failed:', error.message);
       return this.fallbackExtraction(text, filename);
     }
   }
@@ -243,7 +242,6 @@ DOMAINE: [Informatique, Génie Électrique, Génie Mécanique, etc.]`;
   }
 
   fallbackExtraction(text, filename) {
-    console.log('🔄 Using enhanced fallback extraction methods...');
     
     const filenameInfo = this.extractInfoFromFilename(filename);
     
@@ -304,7 +302,7 @@ DOMAINE: [Informatique, Génie Électrique, Génie Mécanique, etc.]`;
       }
       
     } catch (error) {
-      console.error('❌ Enhanced filename parsing error:', error);
+      console.error(' Enhanced filename parsing error:', error);
     }
 
     return { author, year };
@@ -494,7 +492,6 @@ DOMAINE: [Informatique, Génie Électrique, Génie Mécanique, etc.]`;
         
         if (cleanText.includes(termLower)) {
           foundKeywords.add(category);
-          console.log(`✅ Found "${category}" via includes: "${term}"`);
           found = true;
           break;
         }
@@ -504,7 +501,6 @@ DOMAINE: [Informatique, Génie Électrique, Génie Mécanique, etc.]`;
           const allWordsFound = words.every(word => cleanText.includes(word));
           if (allWordsFound) {
             foundKeywords.add(category);
-            console.log(`✅ Found "${category}" via word matching: "${term}"`);
             found = true;
             break;
           }
@@ -514,7 +510,6 @@ DOMAINE: [Informatique, Génie Électrique, Génie Mécanique, etc.]`;
           const regex = new RegExp(termLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
           if (regex.test(cleanText)) {
             foundKeywords.add(category);
-            console.log(`✅ Found "${category}" via regex: "${term}"`);
             found = true;
             break;
           }
@@ -523,7 +518,7 @@ DOMAINE: [Informatique, Génie Électrique, Génie Mécanique, etc.]`;
     }
 
     const result = Array.from(foundKeywords).slice(0, 8);
-    console.log('🏷️ FINAL RESULT - Extracted keywords:', result);
+    console.log('FINAL RESULT - Extracted keywords:', result);
     
     return result;
   }
@@ -540,10 +535,9 @@ DOMAINE: [Informatique, Génie Électrique, Génie Mécanique, etc.]`;
         .replace(/[^\x20-\x7E\u00C0-\u017F]/g, '')
         .trim();
       
-      console.log(`📄 Extracted ${cleanText.length} characters from PDF`);
       return cleanText;
     } catch (error) {
-      console.error('❌ Enhanced PDF text extraction failed:', error);
+      console.error('Enhanced PDF text extraction failed:', error);
       return 'Échec de l\'extraction du texte PDF';
     }
   }

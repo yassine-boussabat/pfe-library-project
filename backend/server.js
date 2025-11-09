@@ -12,10 +12,10 @@ const startServer = async () => {
     await checkServices();
     
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
+      console.log(` Server running on port ${PORT}`);
     });
   } catch (error) {
-    console.error('❌ Failed to start server:', error);
+    console.error(' Failed to start server:', error);
     process.exit(1);
   }
 };

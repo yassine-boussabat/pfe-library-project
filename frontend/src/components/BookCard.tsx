@@ -18,9 +18,9 @@ const BookCard: React.FC<BookCardProps> = ({
   onToggleFavorite 
 }) => {
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return '0 Octets';
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ['Octets', 'Ko', 'Mo', 'Go'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
@@ -33,11 +33,11 @@ const BookCard: React.FC<BookCardProps> = ({
             <>
               <img 
                 src={book.thumbnailPath}
-                alt={`${book.title} - Preview`}
+                alt={`${book.title} - Aperçu`}
                 className="w-full h-full object-cover transition-transform duration-200 hover:scale-105"
                 referrerPolicy="no-referrer"
                 onError={(e) => {
-                  console.log(`❌ Thumbnail failed for: ${book.title}`);
+                  console.log(`Miniature échouée pour : ${book.title}`);
                   const target = e.target as HTMLImageElement;
                   target.style.display = 'none';
                   const fallback = target.parentElement?.querySelector('.pdf-fallback');
@@ -47,11 +47,11 @@ const BookCard: React.FC<BookCardProps> = ({
                   }
                 }}
                 onLoad={() => {
-                  console.log(`✅ Thumbnail loaded for: ${book.title}`);
+                  console.log(` Miniature chargée pour : ${book.title}`);
                 }}
               />
               <div className="absolute top-2 right-2 bg-blue-600 bg-opacity-90 text-white text-xs px-2 py-1 rounded shadow">
-                Preview
+                Aperçu
               </div>
             </>
           ) : null}
@@ -66,8 +66,8 @@ const BookCard: React.FC<BookCardProps> = ({
                   </div>
                 </div>
               </div>
-              <span className="text-sm font-medium text-gray-600">PDF Document</span>
-              <p className="text-xs text-gray-400 mt-1">No preview available</p>
+              <span className="text-sm font-medium text-gray-600">Document PDF</span>
+              <p className="text-xs text-gray-400 mt-1">Aucun aperçu disponible</p>
             </div>
           </div>
 
@@ -77,7 +77,7 @@ const BookCard: React.FC<BookCardProps> = ({
               onToggleFavorite(book._id);
             }}
             className="absolute top-2 left-2 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200 hover:scale-110 z-10"
-            title={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            title={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
           >
             <Heart 
               className={`h-5 w-5 transition-colors ${
@@ -114,7 +114,7 @@ const BookCard: React.FC<BookCardProps> = ({
 
         <div className="h-20 mb-4">
           <p className="text-sm text-gray-600 leading-relaxed line-clamp-4 overflow-hidden">
-            {book.summary || 'No summary available.'}
+            {book.summary || 'Aucun résumé disponible.'}
           </p>
         </div>
 
@@ -134,7 +134,7 @@ const BookCard: React.FC<BookCardProps> = ({
               )}
             </div>
           ) : (
-            <div className="text-xs text-gray-400">No keywords available</div>
+            <div className="text-xs text-gray-400">Aucun mot-clé disponible</div>
           )}
         </div>
 
@@ -144,7 +144,7 @@ const BookCard: React.FC<BookCardProps> = ({
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center text-sm text-gray-500">
               <Download className="h-4 w-4 mr-1" />
-              <span>PDF Document</span>
+              <span>Document PDF</span>
               <span className="ml-2">{formatFileSize(book.fileSize)}</span>
             </div>
           </div>
@@ -154,7 +154,7 @@ const BookCard: React.FC<BookCardProps> = ({
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center gap-2"
           >
             <Download className="h-4 w-4" />
-            Download PDF
+            Télécharger le PDF
           </button>
 
           <button
@@ -166,7 +166,7 @@ const BookCard: React.FC<BookCardProps> = ({
           </button>
 
           <div className="text-xs text-gray-400 mt-2 text-center">
-            Added: {new Date(book.createdAt).toLocaleDateString()}
+            Ajouté : {new Date(book.createdAt).toLocaleDateString('fr-FR')}
           </div>
         </div>
       </div>
