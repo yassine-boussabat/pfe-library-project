@@ -414,9 +414,9 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center gap-4">
             <div className="flex items-center gap-2 text-gray-600">
-              <span>Fait avec</span>
+              <span>Made with</span>
               <Heart className="w-4 h-4 text-red-500 fill-current animate-pulse" />
-              <span>par</span>
+              <span>by</span>
               <a
                 href="https://www.linkedin.com/in/yassine-boussabat-291157298/"
                 target="_blank"
@@ -431,7 +431,7 @@ function App() {
             </div>
 
             <div className="text-sm text-gray-500 text-center">
-              <span>Bonne chance avec votre PFE</span>
+              <span>Good luck with your PFE</span>
             </div>
           </div>
         </div>
